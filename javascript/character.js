@@ -1,5 +1,5 @@
 class Character {
-	constructor(dbInfo, skills, attacks) {
+	constructor(dbInfo, skills, attacks, counters) {
 		this.id = dbInfo["id"];
 		this.name = dbInfo["name"];
 		this.strengthScore = dbInfo["strengthScore"];
@@ -15,9 +15,41 @@ class Character {
 		this.constitution = dbInfo["constitution"];
 		this.intelligence = dbInfo["intelligence"];
 		this.wisdom = dbInfo["wisdom"];
+		this.maxHP = dbInfo["max_hp"];
+		this.hp = dbInfo["hp"];
+		this.armorClass = dbInfo["armor_class"];
+		this.speed = dbInfo["speed"];
+		this.hitDieTotal = dbInfo["hit_die_total"];
+		this.hitDieCurrent = dbInfo["hit_die_current"];
+		this.hitDieRoll = dbInfo["hit_die_roll"]
 		
 		this.skills = skills;
 		this.attacks = attacks;
+		this.counters = counters;
+	}
+	
+	rollInitiative() {
+		let resultText = "/r 1d20";
+		
+		let modifier = convertScoreToModifier(this.dexterityScore);
+		
+		if(modifier > 0)
+			resultText = resultText + " + " + modifier.toString();
+		else if(modifier < 0)
+			resultText = resultText + " " + modifier.toString();
+		
+		return resultText;
+	}
+	
+	rollHitDie(numOfDie){
+		let resultText = "/r " + numOfDie.toString() + this.hitDieRoll;
+		
+		this.hitDieCurrent = this.hitDieCurrent - numOfDie;
+		
+		if(this.hitDieCurrent < 0)
+			this.hitDieCurrent = 0;
+			
+		return resultText;
 	}
 	
 	createRollStringSaveThrow(saveType) {
@@ -153,6 +185,7 @@ class Character {
 		
 		return attackText + "\n" + damageText;
 	}
+	
 }
 
 /*class Skill {
@@ -165,6 +198,80 @@ class Character {
 }*/
 
 let focusCharacter = null;
+
+let updateHealth = function(focusCharacter, amount)
+{
+	focusCharacter.hp += amount;
+	
+	if(focusCharacter.hp > focusCharacter.maxHP)
+		focusCharacter.hp = focusCharacter.maxHP;
+	if(focusCharacter.hp < 0)
+	focusCharacter.hp = 0;
+	
+	document.querySelector("#health").innerHTML = '<p>HP: ' + String(focusCharacter.hp) + ' / ' +  String(focusCharacter.maxHP) + '</p>';
+	
+	//Update on server
+	
+}
+
+let setHealth = function(focusCharacter)
+{
+	focusCharacter.hp = focusCharacter.maxHP;
+	
+	document.querySelector("#health").innerHTML = '<p>HP: ' + String(focusCharacter.hp) + ' / ' +  String(focusCharacter.maxHP) + '</p>';
+	
+	//Update on server
+}
+
+let rollHitDie = function(focusCharacter, numOfDie)
+{
+	let resultText = focusCharacter.rollHitDie(numOfDie);
+	
+	document.querySelector("#hitdie").innerHTML = '<p>HitDie: ' + String(focusCharacter.hitDieCurrent) + ' / ' + String(focusCharacter.hitDieTotal)  + '</p>';
+	
+	document.querySelector("#result").innerHTML = resultText;
+	
+	//Update on server
+	
+	copyToClipboard(resultText);
+}
+
+let resetHitDie = function(focusCharacter)
+{
+	focusCharacter.hitDieCurrent = focusCharacter.hitDieTotal;
+	
+	document.querySelector("#hitdie").innerHTML = '<p>HitDie: ' + String(focusCharacter.hitDieCurrent) + ' / ' + String(focusCharacter.hitDieTotal)  + '</p>';
+	
+	//Update on server
+}
+
+let changeCounter = function(focusCharacter, amount, counterid)
+{
+		for(var i = 0; i < focusCharacter.counters.length; i++)
+		{
+			if(counterid == focusCharacter.counters[i].id)
+			{
+				console.log("#counter"+focusCharacter.counters[i].id.toString());
+				focusCharacter.counters[i]["counter_current"] += amount;
+				
+				if(focusCharacter.counters[i]["counter_current"] > focusCharacter.counters[i]["counter_max"])
+					focusCharacter.counters[i]["counter_current"] = focusCharacter.counters[i]["counter_max"];
+				if(focusCharacter.counters[i]["counter_current"] < 0)
+					focusCharacter.counters[i]["counter_current"] = 0;
+				
+				document.querySelector("#counter"+focusCharacter.counters[i].id.toString()).innerHTML = '<p>' + focusCharacter.counters[i]["name"] + ': ' + focusCharacter.counters[i]["counter_current"] + ' / ' + focusCharacter.counters[i]["counter_max"] + '</p>';
+			}
+		}
+}
+
+let rollInitiative = function(focusCharacter)
+{
+	let resultText = focusCharacter.rollInitiative();
+	
+	document.querySelector("#result").innerHTML = resultText;
+	
+	copyToClipboard(resultText);
+}
 
 let createRollStringSaveThrow = function(focusCharacter, saveType)
 {
@@ -204,3 +311,4 @@ let convertScoreToModifier = function(score)
 	
 	return mod;
 }
+

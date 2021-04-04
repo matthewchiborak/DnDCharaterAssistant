@@ -13,7 +13,7 @@ $conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName, $dbPort
 <html lang="en" dir="ltr">
 	<head>
 		<meta charset="utf-8">
-		<script src="javascript/character.js"></script>
+		<script src="javascript/character.js?version=1"></script>
 		<?php 
 			echo '<title>' . $_GET["name"] . '</title>';
 		?>
@@ -67,15 +67,31 @@ $conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName, $dbPort
 						array_push($info_attack, $row);
 					}
 					
+					//Counters
+					$data_counter = $info["id"];
+					$sql_counter = "SELECT * FROM counters WHERE characterid=?;";
+					$stmt_counter = mysqli_stmt_init($conn);
+					mysqli_stmt_prepare($stmt_counter, $sql_counter);
+					mysqli_stmt_bind_param($stmt_counter, "i", $data_counter);
+					mysqli_stmt_execute($stmt_counter);
+					$result_counter = mysqli_stmt_get_result($stmt_counter);
+					$info_counter = [];
+					while($row = mysqli_fetch_assoc($result_counter))
+					{
+						array_push($info_counter, $row);
+					}
+					
 					$js_array_skill = json_encode($info_skill);
 					$js_array_attack = json_encode($info_attack);
+					$js_array_counter = json_encode($info_counter);
 					$js_array = json_encode($info);
 					echo "<script>var javascript_array = ". $js_array . ";\n";
 					echo "var javascript_array_skill = ". $js_array_skill . ";\n";
 					echo "var javascript_array_attack = ". $js_array_attack . ";\n";
-					echo 'focusCharacter = new Character(javascript_array, javascript_array_skill, javascript_array_attack);'; 
+					echo "var javascript_array_counter = ". $js_array_counter . ";\n";
+					echo 'focusCharacter = new Character(javascript_array, javascript_array_skill, javascript_array_attack, javascript_array_counter);'; 
 					echo '</script>';
-				
+					
 					echo '<h1>' . $_GET["name"] . '</h1>';
 					echo '<p>Str:' . $info["strengthScore"] . 
 					' Dex:' . $info["dexterityScore"] . 
@@ -83,9 +99,27 @@ $conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName, $dbPort
 					' Int:' . $info["intelligenceScore"] .
 					' Wis:' . $info["wisdomScore"] .
 					' Cha:' . $info["charismaScore"] .
+					' AC:' . $info["armor_class"].
+					' Speed:' . $info["speed"].
 					'</p>';
 					
 					echo '<div id="result"></div><br>';
+						
+					echo '<h3>General:</h3>';
+					echo '<button type="button" onclick="rollInitiative(focusCharacter)">Initiative</button>';
+					
+					echo '<div id="health"><p>HP: ' . $info["hp"] . ' / ' . $info["max_hp"]  . '</p></div>';
+
+					echo '<button type="button" onclick="updateHealth(focusCharacter, 1)">^</button>';
+					echo '<button type="button" onclick="updateHealth(focusCharacter, -1)">V</button>';
+					echo '<button type="button" onclick="setHealth(focusCharacter, ' . $info["max_hp"] .')">Reset</button>';
+					echo '</p>';
+					
+					echo '<div id="hitdie"><p>HitDie: ' . $info["hit_die_current"] . ' / ' . $info["hit_die_total"]  . '</p></div>';
+					for ($x = 1; $x <= $info["hit_die_total"]; $x++) {
+						echo '<button type="button" onclick="rollHitDie(focusCharacter, ' . $x . ')">' . $x . '</button>';
+					}
+					echo '<button type="button" onclick="resetHitDie(focusCharacter)">Reset</button>';
 					
 					echo '<h3>Saving Throws:</h3>';
 					echo '<button type="button" onclick="createRollStringSaveThrow(focusCharacter, \'str\')">Strength</button>';
@@ -106,6 +140,14 @@ $conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName, $dbPort
 					foreach ($info_attack as $value_attack)
 					{
 						echo '<button type="button" onclick="createRollStringAttack(focusCharacter, ' . $value_attack["id"] . ')">' . $value_attack["name"] . '</button>';
+					}
+					echo '<br>';
+					echo '<h3>Counters</h3>';
+					foreach ($info_counter as $value_counter)
+					{
+						echo '<div id="counter' . $value_counter["id"] . '"><p>' . $value_counter["name"] . ': ' . $value_counter["counter_current"] . ' / ' . $value_counter["counter_max"] . '</p></div>';
+						echo '<button type="button" onclick="changeCounter(focusCharacter, 1, ' . $value_counter["id"] . ')">^</button>';
+						echo '<button type="button" onclick="changeCounter(focusCharacter, -1, ' . $value_counter["id"] . ')">V</button>';
 					}
 				}
 				else
