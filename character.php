@@ -149,6 +149,11 @@ $conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName, $dbPort
 						echo '<button type="button" onclick="changeCounter(focusCharacter, 1, ' . $value_counter["id"] . ')">^</button>';
 						echo '<button type="button" onclick="changeCounter(focusCharacter, -1, ' . $value_counter["id"] . ')">V</button>';
 					}
+					
+					echo '<br><br><br>';
+					echo '<div id="saveDiv">';
+					echo '<a href="save.php?name=' . $info["name"] . '&hp=' . $info["hp"] . '&hit_die_current=' . $info["hit_die_current"] . '&id=' . $info["id"] . '">Save</a>';
+					echo '</div>';
 				}
 				else
 				{

@@ -211,7 +211,7 @@ let updateHealth = function(focusCharacter, amount)
 	document.querySelector("#health").innerHTML = '<p>HP: ' + String(focusCharacter.hp) + ' / ' +  String(focusCharacter.maxHP) + '</p>';
 	
 	//Update on server
-	
+	document.querySelector("#saveDiv").innerHTML =  '<a href="save.php?name=' + focusCharacter.name + '&hp=' + String(focusCharacter.hp) + '&hit_die_current=' + String(focusCharacter.hitDieCurrent) + '&id=' + String(focusCharacter.id) + '">Save</a>';
 }
 
 let setHealth = function(focusCharacter)
@@ -220,7 +220,8 @@ let setHealth = function(focusCharacter)
 	
 	document.querySelector("#health").innerHTML = '<p>HP: ' + String(focusCharacter.hp) + ' / ' +  String(focusCharacter.maxHP) + '</p>';
 	
-	//Update on server
+		//Update on server
+	document.querySelector("#saveDiv").innerHTML =  '<a href="save.php?name=' + focusCharacter.name + '&hp=' + String(focusCharacter.hp) + '&hit_die_current=' + String(focusCharacter.hitDieCurrent) + '&id=' + String(focusCharacter.id) + '">Save</a>';
 }
 
 let rollHitDie = function(focusCharacter, numOfDie)
@@ -231,7 +232,8 @@ let rollHitDie = function(focusCharacter, numOfDie)
 	
 	document.querySelector("#result").innerHTML = resultText;
 	
-	//Update on server
+		//Update on server
+	document.querySelector("#saveDiv").innerHTML =  '<a href="save.php?name=' + focusCharacter.name + '&hp=' + String(focusCharacter.hp) + '&hit_die_current=' + String(focusCharacter.hitDieCurrent) + '&id=' + String(focusCharacter.id) + '">Save</a>';
 	
 	copyToClipboard(resultText);
 }
@@ -242,7 +244,8 @@ let resetHitDie = function(focusCharacter)
 	
 	document.querySelector("#hitdie").innerHTML = '<p>HitDie: ' + String(focusCharacter.hitDieCurrent) + ' / ' + String(focusCharacter.hitDieTotal)  + '</p>';
 	
-	//Update on server
+		//Update on server
+	document.querySelector("#saveDiv").innerHTML =  '<a href="save.php?name=' + focusCharacter.name + '&hp=' + String(focusCharacter.hp) + '&hit_die_current=' + String(focusCharacter.hitDieCurrent) + '&id=' + String(focusCharacter.id) + '">Save</a>';
 }
 
 let changeCounter = function(focusCharacter, amount, counterid)
